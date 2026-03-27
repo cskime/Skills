@@ -1,0 +1,4 @@
+interface:
+  display_name: "working-skill"
+  short_description: "Implement from a plan and clear review findings"
+  default_prompt: "Use $working-skill to implement the requested changes from the provided plan, then rerun review-fix passes until no new findings remain."

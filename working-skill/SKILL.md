@@ -1,9 +1,9 @@
 ---
-name: implement-from-plan
+name: working-skill
 description: Implement code from an existing plan document and run repeated review-fix passes until the change is clean. Use when the user provides or references a plan, spec, roadmap, design doc, task list, `plan.md`, 설계 문서, or 작업 계획서 and expects execution plus disciplined post-implementation review for plan fidelity, bugs, integration, side effects, refactoring, dead-code cleanup, and final quality gating. Trigger on requests such as "계획 문서대로 구현", "plan 기준으로 작업", or "findings가 없어질 때까지 계속 수정".
 ---
 
-# Implement From Plan
+# working-skill
 
 Execute the plan instead of redesigning it. Keep the implementation aligned to the plan, then keep reviewing and fixing until the last pass is clean.
 
