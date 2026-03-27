@@ -1,0 +1,4 @@
+interface:
+  display_name: "Implementation Planner"
+  short_description: "Analyze requirements into right-sized implementation plans"
+  default_prompt: "Use $planning-skill to analyze this requirement, scope the current project, and write a right-sized implementation plan under docs/."

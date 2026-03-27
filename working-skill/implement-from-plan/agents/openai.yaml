@@ -1,0 +1,4 @@
+interface:
+  display_name: "Implement From Plan"
+  short_description: "Implement from a plan and clear review findings"
+  default_prompt: "Use $implement-from-plan to implement the requested changes from the provided plan, then rerun review-fix passes until no new findings remain."
