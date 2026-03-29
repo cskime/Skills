@@ -1,5 +1,15 @@
 # Review Checklist
 
+## Execution Harness
+
+Run every review pass inside this harness.
+
+- Fixed harness: approved plan, explicit constraints, repository conventions, selected verification commands
+- Mutable surface: smallest in-scope files for the current slice or fix
+- Keep: higher plan fidelity, fewer findings, simpler verified change set
+- Discard: failed checks, scope creep, duplicate complexity, speculative changes with no clear gain
+- Stop: acceptance criteria met, relevant verification passes, final pass produces no new actionable findings
+
 Use these passes after the first working implementation and after any substantial fix. Treat numeric size thresholds as heuristics, not hard rules.
 
 ## 1. Plan fidelity review
@@ -8,6 +18,7 @@ Use these passes after the first working implementation and after any substantia
 - Remove behavior, scope, or files that the plan did not ask for unless they are required to preserve correctness or integration.
 - Check names, data flow, UI states, error handling, and edge cases against the plan.
 - Validate every explicit acceptance criterion.
+- Remove or rewrite speculative changes that do not improve plan fidelity relative to the current best-known state.
 
 ## 2. Bug and critical issue review
 
@@ -40,12 +51,14 @@ Use these passes after the first working implementation and after any substantia
 - Read the entire change set end-to-end as a reviewer, not just the last edited function.
 - Check consistency across implementation, tests, configuration, migrations, and cleanup.
 - Reconcile assumptions that drifted across separate edits.
+- Confirm that no abandoned experiment or half-kept workaround remains in the final diff.
 
 ## 7. Dead code cleanup review
 
 - Remove unused helpers, stale branches, obsolete types, temporary adapters, and duplicate tests.
 - Remove transitional scaffolding that no longer serves the final solution.
 - Keep compatibility code only when it is still required and easy to identify later.
+- Remove artifacts of discarded implementation attempts when they are still visible in code or tests.
 
 ## 8. Quality review
 
@@ -59,6 +72,7 @@ Use these passes after the first working implementation and after any substantia
 - Run one last pass over the full change set.
 - Fix any new actionable finding and revisit every earlier pass affected by that fix.
 - Stop only when the final pass produces no additional material findings.
+- Confirm that every kept change has evidence: plan alignment, verification, or a clearly documented risk-based rationale.
 
 ## Escalate Instead Of Guessing
 
