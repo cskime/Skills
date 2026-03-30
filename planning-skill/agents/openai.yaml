@@ -1,4 +1,4 @@
 interface:
   display_name: "planning-skill"
-  short_description: "Converge implementation plans with checklist loops"
-  default_prompt: "Use $planning-skill to scope this requirement, write a docs/ plan, and iterate with keep/discard checklist reviews until the plan converges."
+  short_description: "Converge implementation plans with zero-finding review gates"
+  default_prompt: "Use $planning-skill to scope this requirement, write a docs/ plan, and iterate with keep/discard checklist reviews plus an independent final review until the same plan text has no new findings."
