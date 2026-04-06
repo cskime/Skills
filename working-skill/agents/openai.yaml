@@ -1,4 +1,4 @@
 interface:
   display_name: "working-skill"
-  short_description: "Implement from plans with keep/discard review loops"
-  default_prompt: "Use $working-skill to execute this plan with small verified edits, keep only the changes that improve the best-known state, and rerun review-fix passes until no new findings remain."
+  short_description: "Execute plans with TDD and zero-finding review loops"
+  default_prompt: "Use $working-skill to execute this plan with red-green-refactor slices, keep only verified improvements, and rerun review-fix passes until no new findings remain."
