@@ -5,12 +5,15 @@
 Run every review pass inside this harness.
 
 - Fixed harness: approved plan, explicit constraints, repository conventions, selected verification commands, current red/green proof for the active slice
+- Required records: compact proof ledger, review-pass log, final-pass record
+- Record placement: keep records in the lightest reliable place. For small changes, inline notes or the final response are enough; do not create a separate log file unless it materially helps.
 - Mutable surface: smallest in-scope tests, production files, and fixtures for the current slice or fix
 - Keep: clearer requirement proof, higher plan fidelity, fewer findings, simpler green change set
 - Discard: tests that never went red for the intended reason, behavior changes without new proof, failed checks, scope creep, duplicate complexity, speculative changes with no clear gain
-- Stop: acceptance criteria met, relevant verification passes, final pass produces no new actionable findings
+- Stop: acceptance criteria met, relevant verification passes, every required pass is recorded, and the final pass explicitly records `새 finding 0건`
 
 Use these passes after the first working implementation and after any substantial fix. Treat numeric size thresholds as heuristics, not hard rules.
+For small low-risk changes, a grouped clean-pass summary is acceptable as long as each pass is still explicitly covered and the final pass result is recorded.
 
 ## 0. TDD fidelity review
 
@@ -19,6 +22,7 @@ Use these passes after the first working implementation and after any substantia
 - Confirm the green step used the smallest production change that satisfied the failing test.
 - Confirm refactors happened only while the relevant suite stayed green.
 - Flag any behavior-changing code path that lacks regression protection.
+- Confirm that each kept behavior-changing edit is linked in the proof ledger.
 
 ## 1. Plan fidelity review
 
@@ -29,6 +33,13 @@ Use these passes after the first working implementation and after any substantia
 - Validate every explicit acceptance criterion.
 - Remove or rewrite speculative changes that do not improve plan fidelity relative to the current best-known state.
 
+## 1.1 Semantic regression review
+
+- Check whether reused names, states, messages, APIs, or existing assets still mean the same thing after the change.
+- Check whether UI copy, status names, error messages, and public API surfaces still match the actual domain contract.
+- Flag cases where the code compiles and types line up, but the behavior now maps to the wrong domain meaning.
+- Add a proving test or an explicit manual check when practical before accepting a semantic reinterpretation.
+
 ## 2. Bug and critical issue review
 
 - Look for correctness bugs, crash paths, invalid state transitions, race conditions, corruption, or data-loss risks.
@@ -36,6 +47,16 @@ Use these passes after the first working implementation and after any substantia
 - Check for security, privacy, or permission regressions.
 - When a new bug is found, reproduce it with the smallest failing test before fixing it when practical.
 - Verify callers, migrations, and compatibility boundaries.
+
+## 2.1 Counterexample hunt
+
+- Exercise inputs where ordering, priority, or precedence changes the result.
+- Exercise cases that only work when the second or third branch is taken instead of the first happy path.
+- Exercise multi-instance and multi-call behavior, not just a single isolated invocation.
+- Exercise reentrancy, repeated calls, and idempotency where the feature can be triggered more than once.
+- Exercise similar-looking mappings whose real contract differs in subtle but important ways.
+- Exercise empty values, errors, partial failures, retries, and timeouts even when the change looked local.
+- Convert material counterexamples into failing tests before fixing them when practical.
 
 ## 3. Large function and file review
 
@@ -55,6 +76,14 @@ Use these passes after the first working implementation and after any substantia
 - Check whether the change altered unrelated behavior, shared state, persistence semantics, caching, logging, metrics, or performance.
 - Verify that observers, lifecycle hooks, async tasks, retries, and background jobs fire only as intended.
 - Check for accidental public contract changes or user-visible behavior shifts outside scope.
+
+## 5.1 Shared state and ordering review
+
+- Ask directly: if the same feature is created or called twice, do the two runs interfere with each other.
+- Ask directly: if call order changes, does the result change for a reason the plan actually allows.
+- Ask directly: can the second call mutate, invalidate, or reinterpret the first result.
+- Ask directly: does a shared runtime, singleton, cache, module-level variable, static state, provider, hook, service, or test process leak state across runs.
+- Add a reproducing test when practical before fixing any contamination or ordering finding.
 
 ## 6. Whole-change review
 
@@ -83,6 +112,9 @@ Use these passes after the first working implementation and after any substantia
 - Fix any new actionable finding and revisit every earlier pass affected by that fix.
 - Stop only when the final pass produces no additional material findings.
 - Confirm that every kept behavior-changing edit has evidence: red-to-green proof, plan alignment, verification, or a clearly documented fallback rationale.
+- Record the final-pass result explicitly as either `새 finding 0건` or `추가 finding N건`. If that record is missing, the stop condition is not met.
+- Confirm that every review pass in this checklist was either executed and logged or explicitly escalated as blocked.
+- Once `새 finding 0건` is recorded and no earlier pass was invalidated, close the task instead of re-running clean passes without new evidence.
 
 ## Escalate Instead Of Guessing
 

@@ -1,4 +1,4 @@
 interface:
   display_name: "working-skill"
-  short_description: "Execute plans with TDD and zero-finding review loops"
-  default_prompt: "Use $working-skill to execute this plan with red-green-refactor slices, keep only verified improvements, and rerun review-fix passes until no new findings remain."
+  short_description: "Execute plans with compact proof-ledger TDD and fail-closed review gates"
+  default_prompt: "Use $working-skill to execute this plan with red-green-refactor slices, maintain a compact proof ledger for each behavior-changing slice, keep records inline on small tasks instead of creating extra process files, and do not declare completion until every required review pass is covered and the final pass explicitly records 새 finding 0건."

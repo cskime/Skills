@@ -11,10 +11,13 @@ Execute the plan via tests-first TDD instead of redesigning it. Run implementati
 
 - 고정 하네스: 승인된 계획 문서, 명시적 제약, 저장소 규칙, 확인한 검증 명령, 활성 구현 슬라이스의 실패/성공 테스트 근거, 사용자 지시
 - 변경 가능한 산출물: 현재 구현 슬라이스에 필요한 최소 프로덕션 파일, 테스트, 픽스처
+- 필수 기록물: 짧은 execution checklist, behavior-changing slice별 proof ledger, review pass 실행 기록, final zero-finding pass 결과 기록
+- 기록 위치: 필수 기록물은 별도 파일, 작업 중 메모, 또는 최종 응답 어디에 있어도 된다. 작은 작업에서는 별도 로그 파일을 새로 만들지 말고 가장 가까운 기존 표면에 짧게 남긴다.
 - Keep 기준: 계획 충실도 증가, 실패 테스트가 의도한 이유로 시작해 통과로 전환됨, actionable finding 감소, green 상태를 유지한 단순화
 - Discard 기준: 의도한 이유로 실패하지 않는 테스트, 실패 테스트 없이 들어간 동작 변경, 검증 실패, scope creep, 중복/임시 복잡도 증가, 계획 대비 근거 없는 우회 구현
-- 종료 조건: acceptance criteria 충족, 가능한 범위의 요구사항이 테스트 또는 명시적 수동 검증으로 입증됨, 필요한 검증 통과, `references/review-checklist.md`의 final zero-finding pass 종료
+- 종료 조건: acceptance criteria 충족, 각 behavior-changing edit가 proof ledger에 연결됨, 각 acceptance criterion의 proof가 기록됨, 각 review pass 실행 여부가 기록됨, 필요한 검증 통과, `references/review-checklist.md`의 final zero-finding pass가 `"새 finding 0건"`으로 명시되어 종료됨
 
+위 기록 중 하나라도 비어 있거나 마지막 pass 결과가 명시되지 않았다면 완료 선언을 금지한다.
 자동으로 끝없이 돌지 말고, 위 종료 조건을 만족하면 멈춘다.
 
 ## Intake
@@ -36,6 +39,8 @@ Execute the plan via tests-first TDD instead of redesigning it. Run implementati
    - Break the plan into ordered behavior slices and map each slice to a proof target: preferred failing automated test, otherwise the lightest repo-native fallback that can still verify the requirement.
    - Mark which acceptance criteria already have coverage and which must start with a new failing test.
    - Convert the plan into a short execution checklist using the normal planning mechanism available in the environment.
+   - Start a compact proof ledger. Keep it short, but keep it current. Track at minimum: requirement or slice, red test or manual fallback, green evidence, counterexample or finding, final status.
+   - On small, low-risk changes, keep the ledger inline in working notes or the final response instead of creating a dedicated artifact file.
 
 2. Run a bounded red-green-refactor loop.
    - Start with the smallest vertical slice that meaningfully advances the plan.
@@ -45,28 +50,35 @@ Execute the plan via tests-first TDD instead of redesigning it. Run implementati
    - Green: edit only the smallest necessary production surface to make the current red test pass. Do not mix in speculative cleanup or unrelated behavior changes.
    - Refactor: once the active slice is green, improve names, duplication, structure, and test readability while keeping the relevant suite green after each meaningful cleanup.
    - Verify the narrowest affected surface after each meaningful red, green, or refactor step.
+   - Update the proof ledger immediately after each behavior-changing keep/discard decision. Any kept behavior-changing edit that is not linked to proof becomes a discard candidate.
    - Keep the change only if it improves plan fidelity or removes a concrete finding without introducing regression.
    - If a speculative idea fails, or the test failed for the wrong reason, discard only your latest idea by reverting or rewriting your own last change and return to the last verified green state. Never revert unrelated user edits.
 
 3. Reach a first working state.
    - Do not begin review passes while the implementation is obviously incomplete.
    - Do not claim a slice is done until its proving test is green and any required integration behavior has been rechecked.
-   - Once the plan is implemented well enough to execute or inspect coherently, begin the mandatory review loop.
+   - Once the plan is implemented well enough to execute or inspect coherently, switch from author mode to reviewer mode and begin the mandatory review loop.
+   - After this point, prioritize finding discovery over writing fresh code. Only add new code when it is the smallest fix for a concrete finding or an uncovered acceptance criterion.
 
 4. Run the mandatory review-fix loop.
    - Use the ordered passes in `references/review-checklist.md`.
    - Treat each pass as a search for actionable findings tied to correctness, maintainability, integration, or scope.
+   - Run the counterexample hunt explicitly instead of assuming the normal review passes will surface the tricky cases on their own.
    - For each material behavior bug or regression risk, add the smallest failing test that reproduces it before changing production code.
    - Fix one material finding at a time when it can be resolved safely within scope.
    - For structure-only findings, refactor under green tests instead of changing behavior speculatively.
    - Re-run the narrowest useful verification after each fix.
+   - Record each completed review pass in the proof ledger or a nearby pass log. Do not rely on memory.
+   - For small, clean changes, group adjacent clean passes into a compact note instead of expanding every pass into a long standalone writeup. The record still has to make it clear that each required pass was covered.
    - Keep review fixes that reduce findings or simplify the change set. Discard fixes that add complexity without improving the current best-known state.
 
 5. Repeat until clean.
    - Continue cycling through the review passes until no new actionable findings remain.
    - If a later fix changes architecture, control flow, shared state, public contracts, persistence behavior, or file boundaries, add or adjust the proving test first and restart from the earliest affected pass.
+   - Treat semantic regression, shared-state contamination, and call-order dependency as independent finding categories, not as implied subcases that can be hand-waved away.
    - Do not stop after a single clean-looking pass if there are unreviewed categories left.
-   - Stop when the change meets the plan, the relevant checks pass, and the final zero-finding review adds nothing new.
+   - Stop only when the change meets the plan, the relevant checks pass, every required pass is recorded, and the rerun final zero-finding review explicitly records `"새 finding 0건"`.
+   - Once that explicit zero-finding record exists and no earlier pass was invalidated, stop. Do not keep reopening the loop just to restate the same clean result.
 
 ## Operating Rules
 
@@ -79,8 +91,11 @@ Execute the plan via tests-first TDD instead of redesigning it. Run implementati
 - Prefer one meaningful red-green-refactor slice or one safe review fix at a time over stacked speculative edits.
 - Use characterization tests before changing legacy behavior when the plan depends on current contracts that are not yet explicit.
 - Keep track of the current best-known-good state and avoid piling new changes on top of unverified work.
+- Treat any behavior-changing change without a proof-ledger link as incomplete work, not as a harmless omission.
 - When the plan and the codebase conflict in a way that could cause unsafe work or major rework, pause and ask for clarification.
 - Keep the scope anchored to the plan unless extra changes are required to preserve correctness or integration.
+- If proof gaps remain, report them as residual risk instead of claiming completion.
+- For small tasks, prefer compact evidence over extra scaffolding. Do not create new process-only files unless they materially reduce ambiguity.
 - If a change neither improves verification nor meaningfully advances the plan, remove or rewrite it instead of rationalizing it.
 
 ## Communication
@@ -89,7 +104,9 @@ Execute the plan via tests-first TDD instead of redesigning it. Run implementati
 - Explain findings in terms of user-visible risk, correctness, maintainability, or scope impact.
 - Call out the proof state when it matters: which test started red, what turned green, and what broader suite was re-run.
 - Distinguish clearly between kept changes, discarded ideas, and residual risks when that history matters to the current state.
-- Finish by summarizing implemented scope, verification that ran, checks that were skipped, and any residual risk.
+- Prefer compact close-out on small tasks. If most review passes are clean, summarize them as grouped clean coverage instead of enumerating repetitive no-op prose.
+- Finish by summarizing implemented scope, verification that ran, checks that were skipped, residual risk or `없음`, and the explicit final-pass result.
+- The final response must include these four headings in substance even if phrasing varies: 구현 범위, 실행한 검증, 실행하지 못한 검증, 남은 리스크 또는 없음.
 
 ## Verification
 
@@ -101,6 +118,7 @@ Execute the plan via tests-first TDD instead of redesigning it. Run implementati
 - Add or update tests for changed behavior and for edge cases fixed during review when automated coverage is available.
 - Verify explicit acceptance criteria from the plan with executable tests whenever practical instead of assuming they are covered by code inspection.
 - When no automation exists and adding a light repo-native harness is not practical within scope, perform manual review of affected paths and explain the reasoning that supports the change.
+- Use the proof ledger to record every acceptance criterion, the proof used for it, and any validation gap that remains open.
 - If a failed verification invalidates the current best-known state, roll back only the affected speculative change and resume from the last verified green state.
 
 ## Reference
